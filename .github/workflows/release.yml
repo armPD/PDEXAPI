@@ -1,11 +1,10 @@
-# .github/workflows/release.yml
 name: Build & attach wheel
 on:
   push:
-    tags: ['v*']          # se dispara con cada tag vX.Y.Z
+    tags: ['v*']             # se dispara con cada vX.Y.Z
 
 permissions:
-  contents: write         # necesario para releases
+  contents: write            # necesario para releases
 
 jobs:
   build:
@@ -22,15 +21,14 @@ jobs:
           python -m pip install build
           python -m build          # genera dist/*.whl y *.tar.gz
 
-      - name: Publish GH Release (crea o actualiza)
+      - name: Publish GH Release (create / update)
         uses: softprops/action-gh-release@v2
         with:
-          # ⚠ OJO: usa ref_name para que sea solo 'v0.1.3', sin 'refs/tags/'
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}    # «v0.1.4», sin «refs/tags/»
           name: "Release ${{ github.ref_name }}"
           draft: false
           prerelease: false
-          remove_existing_assets: true   # borra assets duplicados si los hubiera
+          remove_existing_assets: true        # borra assets duplicados
           files: |
             dist/*.whl
             dist/*.tar.gz
