@@ -1,12 +1,12 @@
-name: Publish to GitHub Packages
+# .github/workflows/release.yml
+name: Build & attach wheel
 
 on:
   push:
-    tags: ["v*"]           # se disparará cada vez que subas un tag vX.Y.Z
+    tags: ["v*"]
 
 permissions:
-  contents: read
-  packages: write          # da permiso al GITHUB_TOKEN para subir al registro
+  contents: write          # subir assets al release
 
 jobs:
   build:
@@ -16,18 +16,26 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'          # elige la versión que prefieras
+          python-version: '3.12'
 
-      - name: Build wheel & sdist
+      - name: Build wheel
         run: |
-          python -m pip install build twine
+          python -m pip install build
           python -m build
 
-      - name: Upload to GitHub Packages
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          twine upload \
-            --repository-url https://pypi.pkg.github.com/${{ github.repository_owner }}/ \
-            dist/*
+      - name: Create release
+        id: create_rel
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload wheel
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
