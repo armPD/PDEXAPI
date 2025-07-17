@@ -1,0 +1,33 @@
+name: Publish to GitHub Packages
+
+on:
+  push:
+    tags: ["v*"]           # se disparará cada vez que subas un tag vX.Y.Z
+
+permissions:
+  contents: read
+  packages: write          # da permiso al GITHUB_TOKEN para subir al registro
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'          # elige la versión que prefieras
+
+      - name: Build wheel & sdist
+        run: |
+          python -m pip install build twine
+          python -m build
+
+      - name: Upload to GitHub Packages
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          twine upload \
+            --repository-url https://pypi.pkg.github.com/${{ github.repository_owner }}/ \
+            dist/*
