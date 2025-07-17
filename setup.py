@@ -1,6 +1,9 @@
-def main():
-    print("Hello from pdexapi!")
+from setuptools import setup, find_packages
+# install package with:
+# uv pip install -e path/to/the/projetc
 
-
-if __name__ == "__main__":
-    main()
+setup(
+    name="epf_lib",
+    version="0.1.0",
+    packages=find_packages(include=["pdexapi", "pdexapi.*"]),  
+)

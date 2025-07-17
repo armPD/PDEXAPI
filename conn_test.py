@@ -4,10 +4,11 @@
 # Author:  Fernando Figueroa  |  Equipo Polydata
 # Created: 2025‑07‑06  |  Last Updated: 2025‑07‑10  |  Version: 1.1-debugging
 # ======================================================================================
-from pdexapi_client import PDEXClient
+import sys
+from pdexapi.PDExAPI_Client import PDEXClient
 
 cli = PDEXClient("url_api_PDEXAPI", "user_dummy", "password_dummy")
-
+sys.exit()
 tabla_df = cli.list_tables()
 
 print(tabla_df)
