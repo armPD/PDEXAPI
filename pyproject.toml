@@ -1,10 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "pdexapi"
 version = "0.1.0"
-description = "Add your description here"
+description = "Private client handling for the usage of the PDEXAPI"
+authors = [{name="Fernando Figueroa", email="fgonzalez@polydata.mx"}]
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "pandas>=2.3.1",
     "requests>=2.32.4",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pdexapi"]    
