@@ -15,7 +15,7 @@ pip install pandas requests
 from pdexapi_client import PDEXClient
 
 cli = PDEXClient(
-    base_url="https://api.polydata.mx",
+    base_url="https://api.pdexapi.com",
     username="tu_usuario",
     password="tu_password",
 )
@@ -23,7 +23,39 @@ cli = PDEXClient(
 print(cli.list_tables())
 ```
 
-## End-points de la API
+## Métodos disponibles
+
+Variables históricas de clima:
+```python
+[
+    "maxtemp_c", 
+    "mintemp_c", 
+    "avgtemp_c", 
+    "maxwind_kph", 
+    "totalprecip_mm",
+    "daily_chance_of_rain",
+    "chance_of_rain",
+    "avghumidity", 
+    "heatindex_c", 
+    "feelslike_c",
+    "uv",
+]
+```
+
+
+Variables predictivas de clima:
+```python
+[
+    "maxtemp_c", 
+    "mintemp_c", 
+    "avgtemp_c", 
+    "maxwind_kph", 
+    "avghumidity", 
+    "heatindex_c", 
+    "feelslike_c"
+]
+```
+
 
 | Método | Ruta | Descripción | Auth |
 |--------|------|-------------|------|
