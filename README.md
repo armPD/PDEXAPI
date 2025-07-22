@@ -20,7 +20,6 @@ cli = PDEXClient(
     password="tu_password",
 )
 
-print(cli.list_tables())
 ```
 
 ## Métodos disponibles
@@ -72,13 +71,19 @@ Variables predictivas de clima:
 
 ## Ejemplos de uso de la librería
 
-A continuación se muestran ejemplos de cómo utilizar cada uno de los métodos disponibles en la clase `Client`, con sus parámetros y argumentos.
+A continuación se muestran ejemplos de cómo utilizar cada uno de los métodos disponibles en la clase `PDEXClient`, con sus parámetros y argumentos.
+
+Copiar el codigo PDExAPI_Client.py al folder de la libreria local. Poner usuario y contraseña.
 
 ```python
-from mi_api import Client
+from lib_local.PDExAPI_Client import PDEXClient
 
-# Inicialización del cliente (reemplaza YOUR_KEY con tu clave real)
-client = Client(api_key="YOUR_KEY")
+cli = PDEXClient(
+    base_url="https://api.pdexapi.com",
+    username="tu_usuario",
+    password="tu_password",
+)
+
 ```
 
 ### list_tables
