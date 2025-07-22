@@ -188,6 +188,30 @@ class PDEXClient:
         data = self._get("/clima_historico", params=params)
         return pd.DataFrame(data) if as_frame else data
 
+    def clima_historico_nacional(
+        self,
+        *,
+        fecha_inicio: str,
+        fecha_fin: str,
+        as_frame: bool = False,
+    ):
+        """
+        Clima histórico de TODO el país entre `fecha_inicio` y `fecha_fin`
+        (incluye todas las variables meteorológicas).
+
+        Parámetros
+        ----------
+        fecha_inicio, fecha_fin : 'YYYY-MM-DD'
+        as_frame : bool, opcional
+            Si True, devuelve `pandas.DataFrame`; si False, lista de dicts.
+        """
+        params = {
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+        }
+        data = self._get("/clima_historico_nacional", params=params)
+        return pd.DataFrame(data) if as_frame else data
+
 
     def poblacion(
         self,

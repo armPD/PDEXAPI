@@ -23,28 +23,120 @@ cli = PDEXClient(
 print(cli.list_tables())
 ```
 
-## Métodos disponibles
+## End-points de la API
 
-| Método | Descripción |
-|--------|-------------|
-| `list_tables()` | Lista las tablas reflejadas en la BD |
-| `inflacion()` | Inflación diaria |
-| `fc_clima_mes()` | Pronóstico mensual climático |
-| `fc_clima_diario()` | Pronóstico diario |
-| `clima_historico()` | Clima observado diario |
-| `poblacion()` | Población por ciudad/estado |
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `POST` | `/token` | Genera token JWT (OAuth2 Password Flow) | ❌ |
+| `GET`  | `/tables` | Listado de tablas disponibles en DB | ✅ |
+| `GET`  | `/inflacion` | Histórico de inflación | ✅ |
+| `GET`  | `/inflacion_prediccion` | Predicción de inflación | ✅ |
+| `GET`  | `/poblacion` | Dato de población por ciudad estado | ✅ |
+| `GET`  | `/clima_historico` | Histórico de variables de clima | ✅ |
+| `GET`  | `/clima_historico_nacional` | Histórico de variables de clima agregado diario nacional | ✅ |
+| `GET`  | `/fc_clima_mes` | Pronóstico **mensual** ARIMA | ✅ |
+| `GET`  | `/fc_clima_diario` | Pronóstico **diario** ARIMA | ✅ |
 
-Todos aceptan `as_frame=True` para `pandas.DataFrame`.
 
-## Ejemplos
+## Ejemplos de uso de la librería
+
+A continuación se muestran ejemplos de cómo utilizar cada uno de los métodos disponibles en la clase `Client`, con sus parámetros y argumentos.
 
 ```python
-df_infl = cli.inflacion("2025-01-01", "2025-03-31", as_frame=True)
-df_fc   = cli.fc_clima_mes(estado="NL", ciudad="Monterrey",
-                           variable="maxtemp_c",
-                           fecha_inicio="2025-08-01",
-                           fecha_fin="2025-12-01",
-                           as_frame=True)
+from mi_api import Client
+
+# Inicialización del cliente (reemplaza YOUR_KEY con tu clave real)
+client = Client(api_key="YOUR_KEY")
+```
+
+### list_tables
+Lista las tablas reflejadas en la base de datos.
+
+```python
+# Obtiene la lista de tablas
+tablas = client.list_tables()
+print(tablas)  # Ejemplo de salida: ['inflacion', 'fc_clima_mes', ...]
+```
+
+### inflacion
+Obtiene la inflación diaria en un rango de fechas.
+
+```python
+infl = client.inflacion(
+    fecha_inicio="2025-01-01",  # Fecha de inicio (YYYY-MM-DD)
+    fecha_fin="2025-01-31",     # Fecha de fin (YYYY-MM-DD)
+    fecha_proceso="2025-02-01", # (Opcional) Fecha de proceso
+    limit=50,                   # (Opcional) Límite de registros a retornar
+    as_frame=True               # Devuelve un pandas.DataFrame en lugar de lista de dicts
+)
+print(infl.head())
+```
+
+### fc_clima_mes
+Pronóstico mensual climático para una variable específica.
+
+```python
+fc_mes = client.fc_clima_mes(
+    estado="Jalisco",           # Nombre del estado
+    ciudad="Guadalajara",       # Nombre de la ciudad
+    variable="temperature",     # Variable a consultar (e.g. 'temperature', 'precipitation')
+    fecha_inicio="2025-07-01",  # Fecha de inicio (YYYY-MM-DD)
+    fecha_fin="2025-12-31",     # Fecha de fin (YYYY-MM-DD)
+    as_frame=False              # Retorna lista de dicts
+)
+print(fc_mes)
+```
+
+### fc_clima_diario
+Pronóstico diario climático para una variable específica.
+
+```python
+fc_diario = client.fc_clima_diario(
+    estado="Ciudad de México",  # Nombre del estado
+    ciudad="Coyoacán",          # Nombre de la ciudad
+    variable="humidity",        # Variable a consultar (e.g. 'humidity', 'wind_speed')
+    fecha_inicio="2025-07-15",  # Fecha de inicio (YYYY-MM-DD)
+    fecha_fin="2025-07-22",     # Fecha de fin (YYYY-MM-DD)
+    as_frame=True               # Devuelve un DataFrame
+)
+print(fc_diario.tail())
+```
+
+### clima_historico
+Recupera clima observado diario histórico entre dos fechas.
+
+```python
+clima_hist = client.clima_historico(
+    estado="Nuevo León",             # Nombre del estado
+    ciudad="Monterrey",              # Nombre de la ciudad
+    fecha_inicio="2024-01-01",       # Fecha de inicio (YYYY-MM-DD)
+    fecha_fin="2024-12-31",          # Fecha de fin (YYYY-MM-DD)
+    variable="totalprecip_mm",       # (Opcional) Nombre de la variable (e.g. 'maxtemp_c', 'totalprecip_mm')
+    as_frame=False                   # Devuelve lista de dicts
+)
+print(clima_hist[:3])
+```
+
+### poblacion
+Obtiene la población de una ciudad o estado en una fecha de proceso.
+
+```python
+# Población por estado (suma ciudades)
+pob_estado = client.poblacion(
+    estado="Puebla",                  # Nombre del estado
+    ciudad=None,                      # None agrupa por todo el estado
+    fecha_proceso="2025-01-01",       # (Opcional) Fecha de proceso
+    as_frame=True                     # Devuelve DataFrame
+)
+print(pob_estado)
+
+# Población por ciudad
+pob_ciudad = client.poblacion(
+    estado="Puebla",
+    ciudad="Puebla de Zaragoza",      # Nombre de la ciudad
+    as_frame=False                    # Lista de dicts con la fecha más reciente
+)
+print(pob_ciudad)
 ```
 
 ## Manejo de errores
@@ -59,7 +151,7 @@ except requests.HTTPError as e:
 
 ## Requisitos
 
-* Python ≥3.8
+* Python ≥3.11
 * `requests`
 * `pandas`
 
