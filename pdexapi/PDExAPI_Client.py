@@ -100,17 +100,32 @@ class PDEXClient:
         fecha_fin: str,
         fecha_proceso: str | None = None,
         *,
-        limit: int = 100,
         as_frame: bool = False,
     ):
         params: Dict[str, Any] = {
             "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
-            "limit": limit,
         }
         if fecha_proceso:
             params["fecha_proceso"] = fecha_proceso
         data = self._get("/inflacion", params=params)
+        return pd.DataFrame(data) if as_frame else data
+    
+    def inflacion_prediccion(
+        self,
+        fecha_inicio: str,
+        fecha_fin: str,
+        fecha_proceso: str | None = None,
+        *,
+        as_frame: bool = False,
+    ):
+        params: Dict[str, Any] = {
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+        }
+        if fecha_proceso:
+            params["fecha_proceso"] = fecha_proceso
+        data = self._get("/inflacion_prediccion", params=params)
         return pd.DataFrame(data) if as_frame else data
 
     def fc_clima_mes(
@@ -193,6 +208,7 @@ class PDEXClient:
         *,
         fecha_inicio: str,
         fecha_fin: str,
+        variable: str | None = None,   # ← opcional
         as_frame: bool = False,
     ):
         """
@@ -209,6 +225,9 @@ class PDEXClient:
             "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
         }
+        if variable:
+            params["variable"] = variable
+
         data = self._get("/clima_historico_nacional", params=params)
         return pd.DataFrame(data) if as_frame else data
 
