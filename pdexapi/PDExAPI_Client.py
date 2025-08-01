@@ -176,6 +176,7 @@ class PDEXClient:
         fecha_inicio: str,
         fecha_fin: str,
         variable: str | None = None,   # ← opcional
+        mes: bool = False, 
         as_frame: bool = False,
     ):
         """
@@ -196,6 +197,7 @@ class PDEXClient:
             "ciudad": ciudad,
             "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
+            "mes": mes,
         }
         if variable:
             params["variable"] = variable
@@ -209,6 +211,7 @@ class PDEXClient:
         fecha_inicio: str,
         fecha_fin: str,
         variable: str | None = None,   # ← opcional
+        mes: bool = False,
         as_frame: bool = False,
     ):
         """
@@ -224,6 +227,7 @@ class PDEXClient:
         params = {
             "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
+            "mes": mes,
         }
         if variable:
             params["variable"] = variable
@@ -231,7 +235,25 @@ class PDEXClient:
         data = self._get("/clima_historico_nacional", params=params)
         return pd.DataFrame(data) if as_frame else data
 
-
+    def clima_historico_estado_mes(
+            self, 
+            *, 
+            estado: str, 
+            fecha_inicio: str, 
+            fecha_fin: str, 
+            variable: str | None = None, 
+            as_frame: bool = False
+        ):
+        params = {
+            "estado": estado,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+        }
+        if variable:
+            params["variable"] = variable
+        data = self._get("/clima_historico_estado_mes", params=params)
+        return pd.DataFrame(data) if as_frame else data
+    
     def poblacion(
         self,
         *,
