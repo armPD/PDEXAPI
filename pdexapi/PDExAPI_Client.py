@@ -94,6 +94,7 @@ class PDEXClient:
         """Lista todas las tablas disponibles en la BD."""
         return self._get("/tables")
 
+
     def inflacion(
         self,
         fecha_inicio: str,
@@ -111,6 +112,7 @@ class PDEXClient:
         data = self._get("/inflacion", params=params)
         return pd.DataFrame(data) if as_frame else data
     
+
     def inflacion_prediccion(
         self,
         fecha_inicio: str,
@@ -127,6 +129,7 @@ class PDEXClient:
             params["fecha_proceso"] = fecha_proceso
         data = self._get("/inflacion_prediccion", params=params)
         return pd.DataFrame(data) if as_frame else data
+
 
     def fc_clima_mes(
         self,
@@ -148,6 +151,7 @@ class PDEXClient:
         data = self._get("/fc_clima_mes", params=params)
         return pd.DataFrame(data) if as_frame else data
     
+
     def fc_clima_diario(
         self,
         *,
@@ -167,6 +171,7 @@ class PDEXClient:
         }
         data = self._get("/fc_clima_diario", params=params)
         return pd.DataFrame(data) if as_frame else data
+
 
     def clima_historico(
         self,
@@ -205,6 +210,7 @@ class PDEXClient:
         data = self._get("/clima_historico", params=params)
         return pd.DataFrame(data) if as_frame else data
 
+
     def clima_historico_nacional(
         self,
         *,
@@ -235,6 +241,7 @@ class PDEXClient:
         data = self._get("/clima_historico_nacional", params=params)
         return pd.DataFrame(data) if as_frame else data
 
+
     def clima_historico_estado_mes(
             self, 
             *, 
@@ -254,6 +261,7 @@ class PDEXClient:
         data = self._get("/clima_historico_estado_mes", params=params)
         return pd.DataFrame(data) if as_frame else data
     
+
     def poblacion(
         self,
         *,
@@ -276,3 +284,51 @@ class PDEXClient:
 
         data = self._get("/poblacion", params=params)
         return pd.DataFrame(data) if as_frame else data 
+    
+
+    def turismo(
+        self,
+        *,
+        estado: str,
+        fecha_inicio: str,
+        fecha_fin: str,
+        as_frame: bool = False,
+    ):
+        """
+        Devuelve datos de turismo para un estado entre dos fechas (por `fecha_periodo`).
+
+        • Siempre usa la fecha más reciente de `fecha_proceso` disponible.
+
+        Parámetros
+        ----------
+        estado : str
+        fecha_inicio, fecha_fin : 'YYYY-MM-DD'
+        as_frame : bool, opcional
+            Si True, devuelve `pandas.DataFrame`; si False, lista de dicts.
+        """
+        params = {
+            "estado": estado,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+        }
+
+        data = self._get("/turismo", params=params)
+        return pd.DataFrame(data) if as_frame else data
+    
+
+    def dias_festivos(
+        self,
+        *,
+        as_frame: bool = False,
+    ):
+        """
+        Devuelve la carta completa de dias festivos
+        Parámetros
+        ----------
+        as_frame : bool, opcional
+            Si True, devuelve `pandas.DataFrame`; si False, lista de dicts.
+        """
+        params = {}
+
+        data = self._get("/dias_festivos", params=params)
+        return pd.DataFrame(data) if as_frame else data

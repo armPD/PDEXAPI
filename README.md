@@ -176,6 +176,33 @@ pob_ciudad = client.poblacion(
 print(pob_ciudad)
 ```
 
+### Turismo
+Obtiene la población turística de un estado en el periodo dado
+
+```python
+
+df_turismo = cli.turismo(
+    estado="Yucatán",
+    fecha_inicio="2023-01-01",
+    fecha_fin="2023-12-01",
+    as_frame=True
+)
+print(df_turismo.head())
+
+```
+
+### Días festivos
+Obtiene los días festivos previstos
+
+```python
+
+df = cli.dias_festivos(
+    as_frame=True
+)
+print(df_turismo.head())
+
+```
+
 ## Manejo de errores
 
 Se propagan como `requests.HTTPError`.  
