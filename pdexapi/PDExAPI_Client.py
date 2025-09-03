@@ -262,6 +262,42 @@ class PDEXClient:
         return pd.DataFrame(data) if as_frame else data
     
 
+    def fc_clima_mes_estado(
+        self,
+        *,
+        estado: str,
+        variable: str,
+        fecha_inicio: str,
+        fecha_fin: str,
+        as_frame: bool = False,
+    ):
+        """
+        Pronóstico mensual de variable climática entre dos fechas para un estado.
+
+        Parámetros
+        ----------
+        estado : str
+            Nombre del estado (ej. "Jalisco")
+        variable : str
+            Nombre de la variable climática (ej. "avgtemp_c")
+        fecha_inicio : str
+            Fecha inicial (ej. "2025-01-01")
+        fecha_fin : str
+            Fecha final (ej. "2025-06-01")
+        as_frame : bool, opcional
+            Si True, devuelve `pandas.DataFrame`; si False, lista de dicts.
+        """
+        params = {
+            "estado": estado,
+            "variable": variable,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+        }
+
+        data = self._get("/fc_clima_mes_estado", params=params)
+        return pd.DataFrame(data) if as_frame else data
+    
+
     def poblacion(
         self,
         *,
