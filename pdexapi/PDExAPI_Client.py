@@ -19,10 +19,12 @@ import os
 import sys
 import time
 import requests
+import numpy as np
 import pandas as pd
 
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Literal, overload
+
 
 class PDEXClient:
     """
@@ -295,6 +297,101 @@ class PDEXClient:
         }
 
         data = self._get("/fc_clima_mes_estado", params=params)
+        return pd.DataFrame(data) if as_frame else data
+
+    def cov_matrix(
+        self,
+        *,
+        fecha_modelo: str,
+        forecast_horizon: int,
+        variable: str,
+        estado: Optional[str] = None,
+        as_array: bool = False,
+        as_frame: bool = False,
+    ):
+        """
+        Matriz de covarianza de pronóstico SARIMA (h x h).
+
+        Parámetros
+        ----------
+        fecha_modelo : str
+            Iteración del modelo (ej. "2025-06-01").
+        forecast_horizon : int
+            Horizonte de pronóstico (h).
+        variable : str
+            Variable climática (ej. "avgtemp_c").
+        estado : str, opcional
+            Estado (ej. "Jalisco"). Si no se especifica, usa "Nacional".
+        as_array : bool, opcional
+            Si True, devuelve `numpy.ndarray` (h x h).
+        as_frame : bool, opcional
+            Si True, devuelve `pandas.DataFrame` con índices/columnas 1..h.
+
+        Returns
+        -------
+        list[list[float]] | np.ndarray | pd.DataFrame
+        """
+        params: Dict[str, Any] = {
+            "fecha_modelo": fecha_modelo,
+            "forecast_horizon": forecast_horizon,
+            "variable": variable,
+        }
+        if estado:
+            params["estado"] = estado
+
+        data: List[List[float]] = self._get("/cov_matrix", params=params)
+
+        if as_array:
+            return np.asarray(data)
+
+        if as_frame:
+            h = len(data)
+            idx = range(1, h + 1)
+            return pd.DataFrame(data, index=idx, columns=idx)
+
+        return data
+
+    def clima_pasado_futuro(
+        self,
+        *,
+        fecha_modelo: str,
+        fecha_fin: str,
+        variable: str,
+        estado: Optional[str] = None,
+        as_frame: bool = False,
+    ):
+        """
+        Serie mensual combinando pasado y futuro alrededor de `fecha_modelo`,
+        hasta `fecha_fin`, para una variable y estado dados.
+
+        Parámetros
+        ----------
+        fecha_modelo : str
+            Iteración del modelo (ej. "2025-01-01").
+        fecha_fin : str
+            Fecha final (ej. "2025-06-01").
+        variable : str
+            Variable climática (ej. "avgtemp_c").
+        estado : str, opcional
+            Estado (ej. "Jalisco"). Si no se especifica, usa "Nacional".
+        as_frame : bool, opcional
+            Si True, devuelve `pandas.DataFrame`; si False, lista de dicts.
+
+        Returns
+        -------
+        list[dict] | pd.DataFrame
+            Cada dict suele incluir columnas como: {"fecha", "valor", ...}
+            según lo que retorne `predict_monthly_state_past_future`.
+        """
+        params: Dict[str, Any] = {
+            "fecha_modelo": fecha_modelo,
+            "fecha_fin": fecha_fin,
+            "variable": variable,
+        }
+        if estado:
+            params["estado"] = estado
+
+        data = self._get("/clima_pasado_futuro", params=params)
         return pd.DataFrame(data) if as_frame else data
     
 

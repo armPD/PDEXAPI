@@ -9,6 +9,12 @@ pip install pandas requests
 # copia `pdexapi_client.py` a tu proyecto
 ```
 
+> Opcional (solo si usarás `as_array=True` en `cov_matrix`):
+>
+> ```bash
+> pip install numpy
+> ```
+
 ## Uso rápido
 
 ```python
@@ -19,7 +25,6 @@ cli = PDEXClient(
     username="tu_usuario",
     password="tu_password",
 )
-
 ```
 
 ## Métodos disponibles
@@ -69,7 +74,8 @@ Variables predictivas de clima:
 | `GET`  | `/fc_clima_diario` | Pronóstico **diario** ARIMA por ciudad | ✅ |
 | `GET`  | `/turismo` | Dato de turismo mensual por estado | ✅ |
 | `GET`  | `/dias_festivos` | Carta de días festivos nacionales | ✅ |
-
+| `GET`  | `/cov_matrix` | **Matriz de covarianza** (h×h) de pronósticos SARIMA | ✅ |
+| `GET`  | `/clima_pasado_futuro` | **Serie mensual** que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin` | ✅ |
 
 ## Ejemplos de uso de la librería
 
@@ -208,39 +214,76 @@ df_estado = cli.clima_historico_estado_mes(
 print(df_estado.head())
 ```
 
-### poblacion
-Consulta de población.
+### **cov_matrix** (nuevo)
+Matriz de covarianza de pronóstico SARIMA de tamaño `h × h`.
 
 ```python
-# Población por estado
-df = cli.poblacion(estado="Yucatán", as_frame=True)
-print(df)
-
-# Población por ciudad
-df = cli.poblacion(estado="Yucatán", ciudad="Mérida", as_frame=True)
-print(df)
-```
-
-### turismo
-Consulta de turismo mensual por estado.
-
-```python
-df_turismo = cli.turismo(
-    estado="Yucatán",
-    fecha_inicio="2023-01-01",
-    fecha_fin="2023-12-01",
-    as_frame=True
+# Como DataFrame (índices/columnas 1..h)
+S_df = cli.cov_matrix(
+    fecha_modelo="2025-06-01",
+    forecast_horizon=12,
+    variable="avgtemp_c",
+    estado="Jalisco",
+    as_frame=True,
 )
-print(df_turismo.head())
+print(S_df)
+
+# Como lista de listas (JSON nativo)
+S_list = cli.cov_matrix(
+    fecha_modelo="2025-06-01",
+    forecast_horizon=12,
+    variable="avgtemp_c",
+)
+print(len(S_list), "x", len(S_list[0]))
+
+# Como numpy.ndarray (requiere `numpy`)
+S_np = cli.cov_matrix(
+    fecha_modelo="2025-06-01",
+    forecast_horizon=12,
+    variable="avgtemp_c",
+    as_array=True,
+)
+print(S_np.shape)
 ```
 
-### dias_festivos
-Carta nacional de días festivos.
+**Parámetros:**
+- `fecha_modelo: str` — iteración del modelo (ej. `"2025-06-01"`).
+- `forecast_horizon: int` — horizonte `h`.
+- `variable: str` — variable climática.
+- `estado: str | None` — si no se especifica, se usa “Nacional”.
+- `as_frame: bool` — si `True`, `pandas.DataFrame`.
+- `as_array: bool` — si `True`, `numpy.ndarray`.
+
+### **clima_pasado_futuro** (nuevo)
+Serie mensual que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin`, para una variable y estado dados. Devuelve lista de diccionarios o `DataFrame`.
 
 ```python
-df_festivos = cli.dias_festivos(as_frame=True)
-print(df_festivos.head())
+# Como lista de dicts
+fc = cli.clima_pasado_futuro(
+    fecha_modelo="2025-01-01",
+    fecha_fin="2025-06-01",
+    variable="avgtemp_c",
+    estado="Jalisco",
+)
+print(fc[:3])
+
+# Como DataFrame
+fc_df = cli.clima_pasado_futuro(
+    fecha_modelo="2025-01-01",
+    fecha_fin="2025-06-01",
+    variable="avgtemp_c",
+    estado="Jalisco",
+    as_frame=True,
+)
+print(fc_df.head())
 ```
+
+**Parámetros:**
+- `fecha_modelo: str` — iteración del modelo (ej. `"2025-01-01"`).
+- `fecha_fin: str` — fecha final (ej. `"2025-06-01"`).
+- `variable: str` — variable climática.
+- `estado: str | None` — si no se especifica, se usa “Nacional”.
+- `as_frame: bool` — `True` para `pandas.DataFrame`.
 
 ## Manejo de errores
 
@@ -251,11 +294,11 @@ try:
 except requests.HTTPError as e:
     print(e.response.text)
 ```
-
 ## Requisitos
 
-* Python ≥3.11
-* `requests`
-* `pandas`
+* Python ≥3.11  
+* `requests`  
+* `pandas`  
+* `numpy` (opcional, para `as_array=True`)
 
 © 2025 Equipo Polydata — Uso interno.
