@@ -351,49 +351,148 @@ class PDEXClient:
 
         return data
 
-    def clima_pasado_futuro(
+
+    def copernicus_historical(
         self,
         *,
-        fecha_modelo: str,
+        estado: str | None,
+        ciudad: str | None,
+        fecha_inicio: str,
         fecha_fin: str,
-        variable: str,
-        estado: Optional[str] = None,
+        variable=None,
+        freq: str = "D",
         as_frame: bool = False,
     ):
         """
-        Serie mensual combinando pasado y futuro alrededor de `fecha_modelo`,
-        hasta `fecha_fin`, para una variable y estado dados.
+        Consulta datos históricos Copernicus.
 
         Parámetros
         ----------
-        fecha_modelo : str
-            Iteración del modelo (ej. "2025-01-01").
-        fecha_fin : str
-            Fecha final (ej. "2025-06-01").
-        variable : str
-            Variable climática (ej. "avgtemp_c").
-        estado : str, opcional
-            Estado (ej. "Jalisco"). Si no se especifica, usa "Nacional".
-        as_frame : bool, opcional
-            Si True, devuelve `pandas.DataFrame`; si False, lista de dicts.
-
-        Returns
-        -------
-        list[dict] | pd.DataFrame
-            Cada dict suele incluir columnas como: {"fecha", "valor", ...}
-            según lo que retorne `predict_monthly_state_past_future`.
+        estado : str | None
+        ciudad : str | None
+        fecha_inicio, fecha_fin : 'YYYY-MM-DD'
+        variable : str | list[str] | None
+            Si None → todas las variables de copernicus_variables.
+        freq : {'H', 'D', 'M'}
+        as_frame : bool
+            True → DataFrame, False → lista de dicts.
         """
-        params: Dict[str, Any] = {
-            "fecha_modelo": fecha_modelo,
+        # Normalizar variable en formato list[str]
+        if variable is None:
+            pass  # API devolverá todo
+        elif isinstance(variable, str):
+            variable = [variable]
+        elif isinstance(variable, list):
+            pass
+        else:
+            raise ValueError("variable debe ser string, lista o None")
+
+        params = {
+            "estado": estado,
+            "ciudad": ciudad,
+            "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
+            "freq": freq,
+        }
+
+        if variable is not None:
+            # FastAPI acepta múltiples ?variable=a&variable=b
+            params["variable"] = variable
+
+        data = self._get("/copernicus_historical", params=params)
+        return pd.DataFrame(data) if as_frame else data
+
+
+    # ------------------------------------------------------------------ #
+    # Copernicus Forecast
+    # ------------------------------------------------------------------ #
+    def copernicus_forecast(
+        self,
+        *,
+        estado: str | None,
+        ciudad: str | None,
+        fecha_entrenamiento: str,
+        fh: int,
+        variable=None,
+        as_frame: bool = False,
+    ):
+        """
+        Forecast climático Copernicus basado en anomalías mensuales.
+
+        Parámetros
+        ----------
+        estado : str | None
+        ciudad : str | None
+        fecha_entrenamiento : 'YYYY-MM-DD'
+        fh : int
+            Horizonte de pronóstico (meses).
+        variable : str | list[str] | None
+            Si None → todas las variables.
+        as_frame : bool
+            True → DataFrame, False → lista de dicts.
+        """
+
+        # Normalizar variable en formato lista
+        if variable is None:
+            pass
+        elif isinstance(variable, str):
+            variable = [variable]
+        elif isinstance(variable, list):
+            pass
+        else:
+            raise ValueError("variable debe ser string, lista o None")
+
+        params = {
+            "estado": estado,
+            "ciudad": ciudad,
+            "fecha_entrenamiento": fecha_entrenamiento,
+            "fh": fh,
+        }
+
+        if variable is not None:
+            params["variable"] = variable
+
+        data = self._get("/copernicus_forecast", params=params)
+        return pd.DataFrame(data) if as_frame else data
+
+
+    def copernicus_forecast(
+        self,
+        *,
+        estado: str | None,
+        ciudad: str | None,
+        fecha_entrenamiento: str,
+        fh: int,
+        variable=None,
+        as_frame: bool = False,
+    ):
+        """
+        Forecast climático Copernicus basado en anomalías.
+
+        Parámetros
+        ----------
+        estado : str | None
+        ciudad : str | None
+        fecha_entrenamiento : 'YYYY-MM-DD'
+        fh : int
+            Horizon de forecast (meses)
+        variable : str | list[str] | None
+            Si None → todas las variables disponibles
+        as_frame : bool
+            Si True → pandas.DataFrame
+
+        """
+        params = {
+            "estado": estado,
+            "ciudad": ciudad,
+            "fecha_entrenamiento": fecha_entrenamiento,
+            "fh": fh,
             "variable": variable,
         }
-        if estado:
-            params["estado"] = estado
 
-        data = self._get("/clima_pasado_futuro", params=params)
+        data = self._get("/copernicus_forecast", params=params)
         return pd.DataFrame(data) if as_frame else data
-    
+
 
     def poblacion(
         self,
