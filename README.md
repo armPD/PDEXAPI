@@ -319,8 +319,9 @@ print(fc_df.head())
 
 ### **Copernicus Historical**
 
-#### temporalidad hora (H)\*\* (nuevo)
+#### temporalidad hora (H) (nuevo)
 
+```python
 df = cli.copernicus_historical(
 estado="Jalisco",
 ciudad="Guadalajara",
@@ -330,9 +331,11 @@ variable=["avgtemp_c", "totalprecip_mm"],
 freq="H",
 as_frame=True
 )
+```
 
-#### temporalidad diaria (D)\*\* (nuevo)
+#### temporalidad diaria (D) (nuevo)
 
+```python
 df = cli.copernicus_historical(
 estado="Jalisco",
 ciudad="Guadalajara",
@@ -342,9 +345,11 @@ variable="avgtemp_c",
 freq="D",
 as_frame=True
 )
+```
 
-#### temporalidad mensual (M)\*\* (nuevo)
+#### temporalidad mensual (M) (nuevo)
 
+```python
 df = cli.copernicus_historical(
 estado="Jalisco",
 ciudad="Guadalajara",
@@ -354,9 +359,11 @@ variable="maxtemp_c",
 freq="M",
 as_frame=True
 )
+```
 
 ### **Copernicus Forecast**
 
+```python
 df = cli.copernicus_forecast(
 estado="Jalisco",
 ciudad="Guadalajara",
@@ -365,6 +372,7 @@ fh=24,
 variable="avgtemp_c",
 as_frame=True
 )
+```
 
 ## Manejo de errores
 
