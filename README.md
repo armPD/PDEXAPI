@@ -89,12 +89,8 @@ Variables de Copernicus:
 | `GET`  | `/dias_festivos`              | Carta de días festivos nacionales                                                             | ✅   |
 | `GET`  | `/cov_matrix`                 | **Matriz de covarianza** (h×h) de pronósticos SARIMA                                          | ✅   |
 | `GET`  | `/clima_pasado_futuro`        | **Serie mensual** que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin` | ✅   |
-
-Copernicus histórico | ✅ |
-| `GET` | `/copernicus_historical` | **historia en H/D/M** de variables en desagregado estado-ciudad, H-hourly (directo del GRIB), D-daily, M-monthly | ✅ |
-
-Copernicus forecast | ✅ |
-| `GET` | `/copernicus_forecast` | Forecast Copernicus basado en **anomalías** primeros 6 meses son las predichas, después el promedio histórico de las anomalías en su máxima desagregación | ✅ |
+| `GET`  | `/copernicus_historical`      | **historia en H/D/M** de variables en desagregado estado-ciudad, H-hourly (directo del GRIB), D-daily, M-monthly | ✅ |
+| `GET`  | `/copernicus_forecast`        | Forecast Copernicus basado en **anomalías** primeros 6 meses son las predichas, después el promedio histórico de las anomalías en su máxima desagregación | ✅ |
 
 ## Ejemplos de uso de la librería
 
