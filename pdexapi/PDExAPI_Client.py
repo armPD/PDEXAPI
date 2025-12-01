@@ -352,52 +352,72 @@ class PDEXClient:
         return data
 
 
-    def copernicus_historical(
+    # ------------------------------------------------------------------ #
+    # Copernicus GRIB Hourly
+    # ------------------------------------------------------------------ #
+    def copernicus_hourly_grib(
         self,
         *,
-        estado: str | None,
-        ciudad: str | None,
         fecha_inicio: str,
         fecha_fin: str,
-        variable=None,
-        freq: str = "D",
+        variable,
+        estado: str | None = None,
+        ciudad: str | None = None,
         as_frame: bool = False,
     ):
         """
-        Consulta datos históricos Copernicus.
+        Consulta GRIB horario directamente desde archivos ERA5.
 
         Parámetros
         ----------
-        estado : str | None
-        ciudad : str | None
-        fecha_inicio, fecha_fin : 'YYYY-MM-DD'
-        variable : str | list[str] | None
-            Si None → todas las variables de copernicus_variables.
-        freq : {'H', 'D', 'M'}
-        as_frame : bool
-            True → DataFrame, False → lista de dicts.
+        fecha_inicio, fecha_fin : str (YYYY-MM-DD)
+        variable : str | list[str]
+        estado, ciudad : opcionales
         """
-        # Normalizar variable en formato list[str]
-        if variable is None:
-            pass  # API devolverá todo
-        elif isinstance(variable, str):
-            variable = [variable]
-        elif isinstance(variable, list):
-            pass
-        else:
-            raise ValueError("variable debe ser string, lista o None")
-
-        params = {
-            "estado": estado,
-            "ciudad": ciudad,
+        params: Dict[str, Any] = {
             "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
-            "freq": freq,
+            "variable": variable,
         }
+        if estado:
+            params["estado"] = estado
+        if ciudad:
+            params["ciudad"] = ciudad
 
-        if variable is not None:
-            # FastAPI acepta múltiples ?variable=a&variable=b
-            params["variable"] = variable
+        data = self._get("/copernicus_hourly_grib", params=params)
+        return pd.DataFrame(data) if as_frame else data
+
+
+    # ------------------------------------------------------------------ #
+    # Copernicus Historical (SQL)
+    # ------------------------------------------------------------------ #
+    def copernicus_historical(
+        self,
+        *,
+        nivel: str,
+        freq: str,
+        variable,
+        fecha_inicio: str,
+        fecha_fin: str,
+        estado: str | None = None,
+        ciudad: str | None = None,
+        as_frame: bool = False,
+    ):
+        """
+        Consulta Copernicus histórico nivel ciudad/estado en frecuencia D/M.
+        """
+
+        params: Dict[str, Any] = {
+            "nivel": nivel,
+            "freq": freq,
+            "variable": variable,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+        }
+        if estado:
+            params["estado"] = estado
+        if ciudad:
+            params["ciudad"] = ciudad
 
         data = self._get("/copernicus_historical", params=params)
         return pd.DataFrame(data) if as_frame else data
@@ -409,11 +429,11 @@ class PDEXClient:
     def copernicus_forecast(
         self,
         *,
-        estado: str | None,
-        ciudad: str | None,
         fecha_entrenamiento: str,
+        variable,
         fh: int,
-        variable=None,
+        estado: str | None = None,
+        ciudad: str | None = None,
         as_frame: bool = False,
     ):
         """
@@ -421,78 +441,25 @@ class PDEXClient:
 
         Parámetros
         ----------
-        estado : str | None
-        ciudad : str | None
         fecha_entrenamiento : 'YYYY-MM-DD'
-        fh : int
-            Horizonte de pronóstico (meses).
-        variable : str | list[str] | None
-            Si None → todas las variables.
-        as_frame : bool
-            True → DataFrame, False → lista de dicts.
+        variable : str | list[str]
+        fh : int (1..N)
+        estado, ciudad : opcionales
         """
 
-        # Normalizar variable en formato lista
-        if variable is None:
-            pass
-        elif isinstance(variable, str):
-            variable = [variable]
-        elif isinstance(variable, list):
-            pass
-        else:
-            raise ValueError("variable debe ser string, lista o None")
-
-        params = {
-            "estado": estado,
-            "ciudad": ciudad,
+        params: Dict[str, Any] = {
             "fecha_entrenamiento": fecha_entrenamiento,
-            "fh": fh,
-        }
-
-        if variable is not None:
-            params["variable"] = variable
-
-        data = self._get("/copernicus_forecast", params=params)
-        return pd.DataFrame(data) if as_frame else data
-
-
-    def copernicus_forecast(
-        self,
-        *,
-        estado: str | None,
-        ciudad: str | None,
-        fecha_entrenamiento: str,
-        fh: int,
-        variable=None,
-        as_frame: bool = False,
-    ):
-        """
-        Forecast climático Copernicus basado en anomalías.
-
-        Parámetros
-        ----------
-        estado : str | None
-        ciudad : str | None
-        fecha_entrenamiento : 'YYYY-MM-DD'
-        fh : int
-            Horizon de forecast (meses)
-        variable : str | list[str] | None
-            Si None → todas las variables disponibles
-        as_frame : bool
-            Si True → pandas.DataFrame
-
-        """
-        params = {
-            "estado": estado,
-            "ciudad": ciudad,
-            "fecha_entrenamiento": fecha_entrenamiento,
-            "fh": fh,
             "variable": variable,
+            "fh": fh,
         }
+        if estado:
+            params["estado"] = estado
+        if ciudad:
+            params["ciudad"] = ciudad
 
         data = self._get("/copernicus_forecast", params=params)
         return pd.DataFrame(data) if as_frame else data
-
+    
 
     def poblacion(
         self,
