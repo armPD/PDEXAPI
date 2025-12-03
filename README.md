@@ -89,7 +89,8 @@ Variables de Copernicus:
 | `GET`  | `/dias_festivos`              | Carta de días festivos nacionales                                                             | ✅   |
 | `GET`  | `/cov_matrix`                 | **Matriz de covarianza** (h×h) de pronósticos SARIMA                                          | ✅   |
 | `GET`  | `/clima_pasado_futuro`        | **Serie mensual** que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin` | ✅   |
-| `GET`  | `/copernicus_historical`      | **historia en H/D/M** de variables en desagregado estado-ciudad, H-hourly (directo del GRIB), D-daily, M-monthly | ✅ |
+| `GET`  | `/copernicus_hourly_grib`     | **historia a nivel hora**,se obtiene en su nivel mas desagregado y se procesa directamente de los archivos .grib | ✅ |
+| `GET`  | `/copernicus_historical`      | **historia en diario (M) o mensual (M)**, al elegir nivel = 'estado' o 'ciudad' se hace la agrupación deseada en la temporildad dada | ✅ |
 | `GET`  | `/copernicus_forecast`        | Forecast Copernicus basado en **anomalías** primeros 6 meses son las predichas, después el promedio histórico de las anomalías en su máxima desagregación | ✅ |
 
 ## Ejemplos de uso de la librería
@@ -315,59 +316,47 @@ print(fc_df.head())
 
 ### **Copernicus Historical**
 
-#### temporalidad hora (H) (nuevo)
-
-```python
-df = cli.copernicus_historical(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_inicio="2023-01-01",
-fecha_fin="2023-01-05",
-variable=["avgtemp_c", "totalprecip_mm"],
-freq="H",
-as_frame=True
-)
-```
-
 #### temporalidad diaria (D) (nuevo)
 
 ```python
-df = cli.copernicus_historical(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_inicio="2023-01-01",
-fecha_fin="2023-01-31",
-variable="avgtemp_c",
-freq="D",
-as_frame=True
-)
+df_estado = cli.copernicus_historical(
+        nivel = 'estado', # nivel estado o ciudad
+        freq = 'D', # freq mensual (M) o diaria (D)
+        variable = "maxtemp_c",
+        fecha_inicio = '2025-01-01',
+        fecha_fin = '2025-11-01',
+        estado='Jalisco', # si se coloca None en ciudad y estado, la api devuelve todos los estados y ciudades y nacional
+        ciudad='Zapopan',
+        as_frame=True
+    )
 ```
 
 #### temporalidad mensual (M) (nuevo)
 
 ```python
-df = cli.copernicus_historical(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_inicio="2023-01-01",
-fecha_fin="2025-01-31",
-variable="maxtemp_c",
-freq="M",
-as_frame=True
-)
+df_estado = cli.copernicus_historical(
+        nivel = 'estado', # nivel estado o ciudad
+        freq = 'M', # freq mensual (M) o diaria (D)
+        variable = "maxtemp_c",
+        fecha_inicio = '2025-01-01',
+        fecha_fin = '2025-11-01',
+        estado=None, # si se coloca None en ciudad y estado, la api devuelve todos los estados y ciudades y nacional
+        ciudad=None,
+        as_frame=True
+    )
 ```
 
 ### **Copernicus Forecast**
 
 ```python
-df = cli.copernicus_forecast(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_entrenamiento="2024-01-01",
-fh=24,
-variable="avgtemp_c",
-as_frame=True
-)
+fc_df = cli.copernicus_forecast(
+            fecha_entrenamiento = '2025-11-01',
+            variable = ["maxtemp_c", "avgtemp_c"],
+            fh = 24,
+            estado = "Jalisco", # si se coloca None en ciudad y estado, la api devuelve todos los estados y ciudades y nacional
+            ciudad = "Zapopan",
+            as_frame=True
+         )
 ```
 
 ## Manejo de errores
