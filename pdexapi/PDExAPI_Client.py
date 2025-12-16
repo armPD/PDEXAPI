@@ -429,6 +429,7 @@ class PDEXClient:
     def copernicus_forecast(
         self,
         *,
+        nivel: str,
         fecha_entrenamiento: str,
         variable,
         fh: int,
@@ -441,6 +442,7 @@ class PDEXClient:
 
         Parámetros
         ----------
+        nivel : str
         fecha_entrenamiento : 'YYYY-MM-DD'
         variable : str | list[str]
         fh : int (1..N)
@@ -448,6 +450,7 @@ class PDEXClient:
         """
 
         params: Dict[str, Any] = {
+            "nivel": nivel,
             "fecha_entrenamiento": fecha_entrenamiento,
             "variable": variable,
             "fh": fh,

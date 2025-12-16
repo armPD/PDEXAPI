@@ -72,25 +72,25 @@ Variables de Copernicus:
 }
 ```
 
-| Método | Ruta                          | Descripción                                                                                   | Auth |
-| ------ | ----------------------------- | --------------------------------------------------------------------------------------------- | ---- |
-| `POST` | `/token`                      | Genera token JWT (OAuth2 Password Flow)                                                       | ❌   |
-| `GET`  | `/tables`                     | Listado de tablas disponibles en DB                                                           | ✅   |
-| `GET`  | `/inflacion`                  | Histórico de inflación                                                                        | ✅   |
-| `GET`  | `/inflacion_prediccion`       | Predicción de inflación                                                                       | ✅   |
-| `GET`  | `/poblacion`                  | Dato de población por ciudad estado                                                           | ✅   |
-| `GET`  | `/clima_historico`            | Histórico de variables de clima                                                               | ✅   |
-| `GET`  | `/clima_historico_nacional`   | Histórico de clima agregado diario nacional                                                   | ✅   |
-| `GET`  | `/clima_historico_estado_mes` | Histórico de clima mensual a nivel estado                                                     | ✅   |
-| `GET`  | `/fc_clima_mes`               | Pronóstico **mensual** ARIMA por ciudad                                                       | ✅   |
-| `GET`  | `/fc_clima_mes_estado`        | Pronóstico **mensual** ARIMA por estado                                                       | ✅   |
-| `GET`  | `/fc_clima_diario`            | Pronóstico **diario** ARIMA por ciudad                                                        | ✅   |
-| `GET`  | `/turismo`                    | Dato de turismo mensual por estado                                                            | ✅   |
-| `GET`  | `/dias_festivos`              | Carta de días festivos nacionales                                                             | ✅   |
-| `GET`  | `/cov_matrix`                 | **Matriz de covarianza** (h×h) de pronósticos SARIMA                                          | ✅   |
-| `GET`  | `/clima_pasado_futuro`        | **Serie mensual** que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin` | ✅   |
-| `GET`  | `/copernicus_historical`      | **historia en H/D/M** de variables en desagregado estado-ciudad, H-hourly (directo del GRIB), D-daily, M-monthly | ✅ |
-| `GET`  | `/copernicus_forecast`        | Forecast Copernicus basado en **anomalías** primeros 6 meses son las predichas, después el promedio histórico de las anomalías en su máxima desagregación | ✅ |
+| Método | Ruta                          | Descripción                                                                                                                                               | Auth |
+| ------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| `POST` | `/token`                      | Genera token JWT (OAuth2 Password Flow)                                                                                                                   | ❌   |
+| `GET`  | `/tables`                     | Listado de tablas disponibles en DB                                                                                                                       | ✅   |
+| `GET`  | `/inflacion`                  | Histórico de inflación                                                                                                                                    | ✅   |
+| `GET`  | `/inflacion_prediccion`       | Predicción de inflación                                                                                                                                   | ✅   |
+| `GET`  | `/poblacion`                  | Dato de población por ciudad estado                                                                                                                       | ✅   |
+| `GET`  | `/clima_historico`            | Histórico de variables de clima                                                                                                                           | ✅   |
+| `GET`  | `/clima_historico_nacional`   | Histórico de clima agregado diario nacional                                                                                                               | ✅   |
+| `GET`  | `/clima_historico_estado_mes` | Histórico de clima mensual a nivel estado                                                                                                                 | ✅   |
+| `GET`  | `/fc_clima_mes`               | Pronóstico **mensual** ARIMA por ciudad                                                                                                                   | ✅   |
+| `GET`  | `/fc_clima_mes_estado`        | Pronóstico **mensual** ARIMA por estado                                                                                                                   | ✅   |
+| `GET`  | `/fc_clima_diario`            | Pronóstico **diario** ARIMA por ciudad                                                                                                                    | ✅   |
+| `GET`  | `/turismo`                    | Dato de turismo mensual por estado                                                                                                                        | ✅   |
+| `GET`  | `/dias_festivos`              | Carta de días festivos nacionales                                                                                                                         | ✅   |
+| `GET`  | `/cov_matrix`                 | **Matriz de covarianza** (h×h) de pronósticos SARIMA                                                                                                      | ✅   |
+| `GET`  | `/clima_pasado_futuro`        | **Serie mensual** que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin`                                                             | ✅   |
+| `GET`  | `/copernicus_historical`      | **historia en H/D/M** de variables en desagregado estado-ciudad, H-hourly (directo del GRIB), D-daily, M-monthly                                          | ✅   |
+| `GET`  | `/copernicus_forecast`        | Forecast Copernicus basado en **anomalías** primeros 6 meses son las predichas, después el promedio histórico de las anomalías en su máxima desagregación | ✅   |
 
 ## Ejemplos de uso de la librería
 
@@ -319,13 +319,13 @@ print(fc_df.head())
 
 ```python
 df = cli.copernicus_historical(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_inicio="2023-01-01",
-fecha_fin="2023-01-05",
-variable=["avgtemp_c", "totalprecip_mm"],
-freq="H",
-as_frame=True
+    estado="Jalisco",
+    ciudad="Guadalajara",
+    fecha_inicio="2023-01-01",
+    fecha_fin="2023-01-05",
+    variable=["avgtemp_c", "totalprecip_mm"],
+    freq="H",
+    as_frame=True
 )
 ```
 
@@ -333,27 +333,27 @@ as_frame=True
 
 ```python
 df = cli.copernicus_historical(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_inicio="2023-01-01",
-fecha_fin="2023-01-31",
-variable="avgtemp_c",
-freq="D",
-as_frame=True
+    estado="Jalisco",
+    ciudad="Guadalajara",
+    fecha_inicio="2023-01-01",
+    fecha_fin="2023-01-31",
+    variable="avgtemp_c",
+    freq="D",
+    as_frame=True
 )
 ```
 
 #### temporalidad mensual (M) (nuevo)
 
 ```python
-df = cli.copernicus_historical(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_inicio="2023-01-01",
-fecha_fin="2025-01-31",
-variable="maxtemp_c",
-freq="M",
-as_frame=True
+    df = cli.copernicus_historical(
+    estado="Jalisco",
+    ciudad="Guadalajara",
+    fecha_inicio="2023-01-01",
+    fecha_fin="2025-01-31",
+    variable="maxtemp_c",
+    freq="M",
+    as_frame=True
 )
 ```
 
@@ -361,13 +361,14 @@ as_frame=True
 
 ```python
 df = cli.copernicus_forecast(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_entrenamiento="2024-01-01",
-fh=24,
-variable="avgtemp_c",
-as_frame=True
-)
+    nivel='ciudad',
+    estado="Jalisco",
+    ciudad="Guadalajara",
+    fecha_entrenamiento="2024-01-01",
+    fh=24,
+    variable="avgtemp_c",
+    as_frame=True
+    )
 ```
 
 ## Manejo de errores
