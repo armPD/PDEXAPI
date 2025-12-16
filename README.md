@@ -1,37 +1,51 @@
-# PDEX API Python Client
+# PDEXAPI Client lib
 
-Ligera envoltura (_wrapper_) para interactuar con la **API Polydata Exógenos** (PDExAPI).
+Libreria para interactuar con la API de datos exógenos nativa de Polydata (PDEXAPI). Esta libreria es la envoltura del lado del **Cliente**. Provee acceso mediante autenticación a variables de clima históricas, predicciones, inflación, población y más.
 
-## Instalación
+## Adopción
+
+### Instalación con solo pip
 
 ```bash
-pip install pandas requests
-# copia `pdexapi_client.py` a tu proyecto
+pip install git+https://github.com/armPD/PDEXAPI.git
+```
+> Opcional instalar una versión específica (recomendado para producción):
+
+```bash
+pip install git+https://github.com/armPD/PDEXAPI.git@v0.1.0
 ```
 
-> Opcional (solo si usarás `as_array=True` en `cov_matrix`):
->
-> ```bash
-> pip install numpy
-> ```
+### Instalación con uv
 
-## Uso rápido
+Dado los estándares de manejo de paqueterias, es recomendable hacer la instalación utilizando **uv**. Es necesario crear ambiente virtual antes de ejecutar el comando.
+
+```bash
+uv pip install git+https://github.com/armPD/PDEXAPI.git
+```
+
+### Uso rápido
 
 ```python
-from pdexapi_client import PDEXClient
+from pdexapi  import PDEXClient
 
 cli = PDEXClient(
-    base_url="https://api.pdexapi.com",
+    base_url="http://api.pdexapi.com", # Nota: sin la s en http
     username="tu_usuario",
     password="tu_password",
 )
 ```
+La autenticación es manejada automáticamente cuando el cliente es creado y validado con las credenciales.
 
-## Métodos disponibles
+## Contextualización del clima
+
+Actualmente se manejan dos servicios de proveedor de datos climatológicos: **WeatherAPI** y **Copernicus**. 
+- El primero es una API de suscripción completamente optimizada para el usuario final, con ella se hace una actualización diaria para la geografía de interés. Es una caja negra y no se sabe certeramente como funciona.
+- El segundo es un servicio mucho más técnico y científico, con el cual se tienen que hacer diversos preprocesamientos para llegar a un esquema similar de manejo de datos. 
 
 Variables históricas de clima:
 
 ```python
+WeatherAPI = 
 [
     "maxtemp_c",
     "mintemp_c",
@@ -45,11 +59,20 @@ Variables históricas de clima:
     "feelslike_c",
     "uv",
 ]
+
+Copernicus =
+[
+    "maxtemp_c",
+    "mintemp_c",
+    "avgtemp_c",
+    "totalprecip_mm",
+]
 ```
 
 Variables predictivas de clima:
 
 ```python
+WeatherAPI = 
 [
     "maxtemp_c",
     "mintemp_c",
@@ -59,9 +82,17 @@ Variables predictivas de clima:
     "heatindex_c",
     "feelslike_c"
 ]
+
+Copernicus =
+[
+    "maxtemp_c",
+    "mintemp_c",
+    "avgtemp_c",
+    "totalprecip_mm",
+]
 ```
 
-Variables de Copernicus:
+Variables nativas de Copernicus y su análogo:
 
 ```python
 {
@@ -72,56 +103,53 @@ Variables de Copernicus:
 }
 ```
 
-| Método | Ruta                          | Descripción                                                                                                                                               | Auth |
+## Métodos disponibles
+
+| Método | Ruta                          | Descripción                                                                                                                                               | Referencia |
 | ------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| `POST` | `/token`                      | Genera token JWT (OAuth2 Password Flow)                                                                                                                   | ❌   |
+| `POST` | `/token`                      | Genera token JWT (OAuth2 Password Flow)                                                                                                                   | ⚠️   |
 | `GET`  | `/tables`                     | Listado de tablas disponibles en DB                                                                                                                       | ✅   |
 | `GET`  | `/inflacion`                  | Histórico de inflación                                                                                                                                    | ✅   |
 | `GET`  | `/inflacion_prediccion`       | Predicción de inflación                                                                                                                                   | ✅   |
-| `GET`  | `/poblacion`                  | Dato de población por ciudad estado                                                                                                                       | ✅   |
-| `GET`  | `/clima_historico`            | Histórico de variables de clima                                                                                                                           | ✅   |
-| `GET`  | `/clima_historico_nacional`   | Histórico de clima agregado diario nacional                                                                                                               | ✅   |
-| `GET`  | `/clima_historico_estado_mes` | Histórico de clima mensual a nivel estado                                                                                                                 | ✅   |
-| `GET`  | `/fc_clima_mes`               | Pronóstico **mensual** ARIMA por ciudad                                                                                                                   | ✅   |
-| `GET`  | `/fc_clima_mes_estado`        | Pronóstico **mensual** ARIMA por estado                                                                                                                   | ✅   |
-| `GET`  | `/fc_clima_diario`            | Pronóstico **diario** ARIMA por ciudad                                                                                                                    | ✅   |
+| `GET`  | `/poblacion`                  | Dato de población por ciudad estado                                                                                                                       | 🚨   |
+| `GET`  | `/clima_historico`            | (WeatherAPI) Histórico de variables de clima                                                                                                                           | 🚨   |
+| `GET`  | `/clima_historico_nacional`   | (WeatherAPI) Histórico de clima agregado diario nacional                                                                                                               | 🚨   |
+| `GET`  | `/clima_historico_estado_mes` | (WeatherAPI) Histórico de clima mensual a nivel estado                                                                                                                 | 🚨   |
+| `GET`  | `/fc_clima_mes`               | (WeatherAPI) Pronóstico **mensual** ARIMA por ciudad                                                                                                                   | 🚨   |
+| `GET`  | `/fc_clima_mes_estado`        | (WeatherAPI) Pronóstico **mensual** ARIMA por estado                                                                                                                   | 🚨   |
+| `GET`  | `/fc_clima_diario`            | (WeatherAPI) Pronóstico **diario** ARIMA por ciudad                                                                                                                    | 🚨   |
 | `GET`  | `/turismo`                    | Dato de turismo mensual por estado                                                                                                                        | ✅   |
 | `GET`  | `/dias_festivos`              | Carta de días festivos nacionales                                                                                                                         | ✅   |
 | `GET`  | `/cov_matrix`                 | **Matriz de covarianza** (h×h) de pronósticos SARIMA                                                                                                      | ✅   |
 | `GET`  | `/clima_pasado_futuro`        | **Serie mensual** que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin`                                                             | ✅   |
 | `GET`  | `/copernicus_hourly_grib`     | **historia a nivel hora**,se obtiene en su nivel mas desagregado y se procesa directamente de los archivos .grib                                          | ✅   |
 | `GET`  | `/copernicus_historical`      | **historia en diario (M) o mensual (M)**, al elegir nivel = 'estado' o 'ciudad' se hace la agrupación deseada en la temporildad dada                      | ✅   |
-| `GET`  | `/copernicus_forecast`        | Forecast Copernicus basado en **anomalías** primeros 6 meses son las predichas, después el promedio histórico de las anomalías en su máxima desagregación | ✅   |
+| `GET`  | `/copernicus_forecast`        | Forecast Copernicus basado en **anomalías** primeros 6 meses son las predichas, después el promedio histórico de las anomalías en su máxima desagregación, al elegir nivel = 'estado' o 'ciudad' se hace la agrupación deseada | ✅   |
 
-## Ejemplos de uso de la librería
+**Leyenda**
+- ✅ - Endpoint validado y actualizado hasta la versión de última actualización reportada.
+- ⚠️ - Método propio de la API, omitir su uso.
+- 🚨 - Próximo a darse de baja.
+
+
+### Ejemplos de uso de la librería
 
 A continuación se muestran ejemplos de cómo utilizar cada uno de los métodos disponibles en la clase `PDEXClient`, con sus parámetros y argumentos.
 
-Copiar el código `PDExAPI_Client.py` al folder de la librería local. Poner usuario y contraseña.
-
 ```python
-from lib_local.PDExAPI_Client import PDEXClient
+from pdexapi  import PDEXClient
 
 cli = PDEXClient(
-    base_url="https://api.pdexapi.com",
+    base_url="http://api.pdexapi.com",
     username="tu_usuario",
     password="tu_password",
 )
 ```
 
-### list_tables
-
-Lista las tablas reflejadas en la base de datos.
-
-```python
-# Obtiene la lista de tablas
-tablas = cli.list_tables()
-print(tablas)  # Ejemplo de salida: ['inflacion', 'fc_clima_mes', ...]
-```
-
+## Endpoints
 ### inflacion
 
-Obtiene la inflación diaria en un rango de fechas.
+Obtiene la inflación diaria en un rango de fechas. Proveedor: gobierno de México.
 
 ```python
 infl = cli.inflacion(
@@ -135,7 +163,7 @@ print(infl.head())
 
 ### inflacion_prediccion
 
-Predicción de inflación futura.
+Predicción de inflación futura. Proveedor: gobierno de México.
 
 ```python
 pred = cli.inflacion_prediccion(
@@ -148,7 +176,7 @@ print(pred)
 
 ### fc_clima_mes
 
-Pronóstico mensual climático para una ciudad.
+Pronóstico mensual climático para una ciudad. Proveedor: WeatherAPI + Polydata.
 
 ```python
 fc_mes = cli.fc_clima_mes(
@@ -162,9 +190,9 @@ fc_mes = cli.fc_clima_mes(
 print(fc_mes)
 ```
 
-### fc_clima_mes_estado
+### fc_clima_mes_estado 
 
-Pronóstico mensual climático para un estado completo.
+Pronóstico mensual climático para un estado completo. Proveedor: WeatherAPI + Polydata.
 
 ```python
 fc_estado = cli.fc_clima_mes_estado(
@@ -177,9 +205,9 @@ fc_estado = cli.fc_clima_mes_estado(
 print(fc_estado)
 ```
 
-### fc_clima_diario
+### fc_clima_diario 
 
-Pronóstico diario climático para una ciudad.
+Pronóstico diario climático para una ciudad. Proveedor: WeatherAPI + Polydata.
 
 ```python
 fc_diario = cli.fc_clima_diario(
@@ -195,7 +223,7 @@ print(fc_diario.tail())
 
 ### clima_historico
 
-Clima diario histórico entre dos fechas.
+Clima diario histórico entre dos fechas. Proveedor: WeatherAPI.
 
 ```python
 clima_hist = cli.clima_historico(
@@ -211,7 +239,7 @@ print(clima_hist.head())
 
 ### clima_historico_nacional
 
-Clima histórico agregado a nivel nacional (todas las ciudades).
+Clima histórico agregado a nivel nacional (todas las ciudades). Proveedor: WeatherAPI.
 
 ```python
 df_nacional = cli.clima_historico_nacional(
@@ -224,9 +252,9 @@ df_nacional = cli.clima_historico_nacional(
 print(df_nacional.head())
 ```
 
-### clima_historico_estado_mes
+### clima_historico_estado_mes 
 
-Clima mensual histórico para un estado.
+Clima mensual histórico para un estado. Proveedor: WeatherAPI.
 
 ```python
 df_estado = cli.clima_historico_estado_mes(
@@ -239,9 +267,9 @@ df_estado = cli.clima_historico_estado_mes(
 print(df_estado.head())
 ```
 
-### **cov_matrix** (nuevo)
+### cov_matrix
 
-Matriz de covarianza de pronóstico SARIMA de tamaño `h × h`.
+Matriz de covarianza de pronóstico SARIMA de tamaño `h × h`. Proveedor: Polydata.
 
 ```python
 # Como DataFrame (índices/columnas 1..h)
@@ -272,18 +300,9 @@ S_np = cli.cov_matrix(
 print(S_np.shape)
 ```
 
-**Parámetros:**
+### clima_pasado_futuro
 
-- `fecha_modelo: str` — iteración del modelo (ej. `"2025-06-01"`).
-- `forecast_horizon: int` — horizonte `h`.
-- `variable: str` — variable climática.
-- `estado: str | None` — si no se especifica, se usa “Nacional”.
-- `as_frame: bool` — si `True`, `pandas.DataFrame`.
-- `as_array: bool` — si `True`, `numpy.ndarray`.
-
-### **clima_pasado_futuro**
-
-Serie mensual que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin`, para una variable y estado dados. Devuelve lista de diccionarios o `DataFrame`.
+Serie mensual que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin`, para una variable y estado dados. Devuelve lista de diccionarios o `DataFrame`. Proveedor: Polydata.
 
 ```python
 # Como lista de dicts
@@ -306,31 +325,25 @@ fc_df = cli.clima_pasado_futuro(
 print(fc_df.head())
 ```
 
-**Parámetros:**
+### **Copernicus Historical** 
 
-- `fecha_modelo: str` — iteración del modelo (ej. `"2025-01-01"`).
-- `fecha_fin: str` — fecha final (ej. `"2025-06-01"`).
-- `variable: str` — variable climática.
-- `estado: str | None` — si no se especifica, se usa “Nacional”.
-- `as_frame: bool` — `True` para `pandas.DataFrame`.
-
-### **Copernicus Historical**
-
-#### temporalidad hora (H) (nuevo)
+#### temporalidad hora (H) 
+En este endpoint se encuentra la mayor desagregación de clima en la base, en la cual se consultan los archivos GRIB directamente (archivos binarios optimizados para meteorología) los cuales tienen la data por horas. Si se desea usar es recomendable consultar día por día, ya que un rango de fechas amplio podría botar el timeout del sistema.
 
 ```python
 df = cli.copernicus_historical(
-estado="Jalisco",
-ciudad="Guadalajara",
-fecha_inicio="2023-01-01",
-fecha_fin="2023-01-05",
-variable=["avgtemp_c", "totalprecip_mm"],
-freq="H",
-as_frame=True
+    estado="Jalisco",
+    ciudad="Guadalajara",
+    fecha_inicio="2023-01-01",
+    fecha_fin="2023-01-05",
+    variable=["avgtemp_c", "totalprecip_mm"],
+    freq="H",
+    as_frame=True
 )
 ```
 
-#### temporalidad diaria (D) (nuevo)
+#### temporalidad diaria (D)
+En este endpoint se consulta la información ya depurada de los archivos GRIB en su agregación por día.
 
 ```python
 df_estado = cli.copernicus_historical(
@@ -345,7 +358,8 @@ df_estado = cli.copernicus_historical(
     )
 ```
 
-#### temporalidad mensual (M) (nuevo)
+#### temporalidad mensual (M)
+En este endpoint se consulta la información ya depurada de los archivos GRIB en su agregación mensual, su actualización se hace una vez que la tabla de datos diarios esté actualizada hasta el último día del mes.
 
 ```python
 df_estado = cli.copernicus_historical(
@@ -361,9 +375,11 @@ df_estado = cli.copernicus_historical(
 ```
 
 ### **Copernicus Forecast**
+Este endpoint es un trabajo de Polydata en el que se complementa la información de la API para poder generar escenarios futuros. Se toman las anomalías de las variables y se agregan al promedio histórico ponderado por población, dado que la actualización de anomalías de Copernicus es hasta 6 meses en el futuro, si se hace una consulta con fh mayor a 6, a partir del mes 7 regresará el promedio de las anomalías históricas agregado al promedio histórico.
 
 ```python
 fc_df = cli.copernicus_forecast(
+            nivel = 'estado', # nivel estado o ciudad
             fecha_entrenamiento = '2025-11-01',
             variable = ["maxtemp_c", "avgtemp_c"],
             fh = 24,
