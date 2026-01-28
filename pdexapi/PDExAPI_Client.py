@@ -433,6 +433,8 @@ class PDEXClient:
         fecha_entrenamiento: str,
         variable,
         fh: int,
+        velocity: bool,
+        anomaly: bool,
         estado: str | None = None,
         ciudad: str | None = None,
         as_frame: bool = False,
@@ -454,6 +456,8 @@ class PDEXClient:
             "fecha_entrenamiento": fecha_entrenamiento,
             "variable": variable,
             "fh": fh,
+            "velocity": velocity,
+            "anomaly": anomaly,
         }
         if estado:
             params["estado"] = estado
