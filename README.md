@@ -111,25 +111,26 @@ Variables nativas de Copernicus y su análogo:
 | `GET`  | `/tables`                     | Listado de tablas disponibles en DB                                                                                                                       | ✅   |
 | `GET`  | `/inflacion`                  | Histórico de inflación                                                                                                                                    | ✅   |
 | `GET`  | `/inflacion_prediccion`       | Predicción de inflación                                                                                                                                   | ✅   |
-| `GET`  | `/poblacion`                  | Dato de población por ciudad estado                                                                                                                       | 🚨   |
-| `GET`  | `/clima_historico`            | (WeatherAPI) Histórico de variables de clima                                                                                                                           | 🚨   |
-| `GET`  | `/clima_historico_nacional`   | (WeatherAPI) Histórico de clima agregado diario nacional                                                                                                               | 🚨   |
-| `GET`  | `/clima_historico_estado_mes` | (WeatherAPI) Histórico de clima mensual a nivel estado                                                                                                                 | 🚨   |
-| `GET`  | `/fc_clima_mes`               | (WeatherAPI) Pronóstico **mensual** ARIMA por ciudad                                                                                                                   | 🚨   |
-| `GET`  | `/fc_clima_mes_estado`        | (WeatherAPI) Pronóstico **mensual** ARIMA por estado                                                                                                                   | 🚨   |
-| `GET`  | `/fc_clima_diario`            | (WeatherAPI) Pronóstico **diario** ARIMA por ciudad                                                                                                                    | 🚨   |
+| `GET`  | `/poblacion`                  | Dato de población por ciudad estado                                                                                                                       |  ✅  |
+| `GET`  | `/clima_historico`            | (WeatherAPI) Histórico de variables de clima                                                                                                                           |  ✅  |
+| `GET`  | `/clima_historico_nacional`   | (WeatherAPI) Histórico de clima agregado diario nacional                                                                                                               |  ✅  |
+| `GET`  | `/clima_historico_estado_mes` | (WeatherAPI) Histórico de clima mensual a nivel estado                                                                                                                 |  ✅  |
+| `GET`  | `/fc_clima_mes`               | (WeatherAPI) Pronóstico **mensual** ARIMA por ciudad                                                                                                                   |  ✅  |
+| `GET`  | `/fc_clima_mes_estado`        | (WeatherAPI) Pronóstico **mensual** ARIMA por estado                                                                                                                   |  ✅  |
+| `GET`  | `/fc_clima_diario`            | (WeatherAPI) Pronóstico **diario** ARIMA por ciudad                                                                                                                    |  ✅  |
 | `GET`  | `/turismo`                    | Dato de turismo mensual por estado                                                                                                                        | ✅   |
 | `GET`  | `/dias_festivos`              | Carta de días festivos nacionales                                                                                                                         | ✅   |
 | `GET`  | `/cov_matrix`                 | **Matriz de covarianza** (h×h) de pronósticos SARIMA                                                                                                      | ✅   |
 | `GET`  | `/clima_pasado_futuro`        | **Serie mensual** que concatena pasado y futuro alrededor de `fecha_modelo` hasta `fecha_fin`                                                             | ✅   |
 | `GET`  | `/copernicus_hourly_grib`     | **historia a nivel hora**,se obtiene en su nivel mas desagregado y se procesa directamente de los archivos .grib                                          | ✅   |
-| `GET`  | `/copernicus_historical`      | **historia en diario (M) o mensual (M)**, al elegir nivel = 'estado' o 'ciudad' se hace la agrupación deseada en la temporildad dada                      | ✅   |
+| `GET`  | `/copernicus_historical`      | **historia en diario (D) o mensual (M)**, al elegir nivel = 'estado' o 'ciudad' se hace la agrupación deseada en la temporalidad dada                      | ✅   |
 | `GET`  | `/copernicus_forecast`        | Forecast Copernicus basado en **anomalías** primeros 6 meses son las predichas, después el promedio histórico de las anomalías en su máxima desagregación, al elegir nivel = 'estado' o 'ciudad' se hace la agrupación deseada | ✅   |
+| `GET`  | `/copernicus_historical_latam` | **historia en diario (D) o mensual (M) para LATAM**, al elegir nivel = 'departamento' o 'municipio' se hace la agrupación deseada en la temporalidad dada | ✅   |
+| `GET`  | `/copernicus_forecast_latam`   | Forecast Copernicus basado en **anomalías** para LATAM, primeros 6 meses son las predichas, después el promedio histórico de las anomalías | ✅   |
 
 **Leyenda**
 - ✅ - Endpoint validado y actualizado hasta la versión de última actualización reportada.
 - ⚠️ - Método propio de la API, omitir su uso.
-- 🚨 - Próximo a darse de baja.
 
 
 ### Ejemplos de uso de la librería
@@ -383,11 +384,118 @@ fc_df = cli.copernicus_forecast(
             fecha_entrenamiento = '2025-11-01',
             variable = ["maxtemp_c", "avgtemp_c"],
             fh = 24,
+            velocity=False,  # incluir velocidad de cambio
+            anomaly=True,    # incluir anomalías
             estado = "Jalisco", # si se coloca None en ciudad y estado, la api devuelve todos los estados y ciudades y nacional
             ciudad = "Zapopan",
             as_frame=True
          )
 ```
+
+### **Copernicus Historical LATAM**
+
+Endpoint para consultar datos históricos de clima de Copernicus para países de Latinoamérica. Funciona de manera similar a `copernicus_historical` pero con la estructura geográfica de LATAM (país → departamento → municipio).
+
+#### temporalidad diaria (D)
+
+```python
+df = cli.copernicus_historical_latam(
+    nivel='departamento',  # nivel departamento o municipio
+    freq='D',  # freq mensual (M) o diaria (D)
+    variable="maxtemp_c",
+    fecha_inicio='2025-01-01',
+    fecha_fin='2025-11-01',
+    pais='Colombia',
+    departamento='Antioquia',  # si se coloca None, la api devuelve todos los departamentos
+    municipio=None,
+    as_frame=True
+)
+print(df.head())
+```
+
+#### temporalidad mensual (M)
+
+```python
+df = cli.copernicus_historical_latam(
+    nivel='municipio',
+    freq='M',
+    variable="avgtemp_c",
+    fecha_inicio='2024-01-01',
+    fecha_fin='2024-12-01',
+    pais='Colombia',
+    departamento='Cundinamarca',
+    municipio='Bogotá',
+    as_frame=True
+)
+print(df.head())
+```
+
+#### Consulta a nivel país (todos los departamentos/municipios)
+
+```python
+df = cli.copernicus_historical_latam(
+    nivel='departamento',
+    freq='M',
+    variable="totalprecip_mm",
+    fecha_inicio='2024-01-01',
+    fecha_fin='2024-12-01',
+    pais='Perú',
+    departamento=None,  # None devuelve todos los departamentos
+    municipio=None,
+    as_frame=True
+)
+print(df.head())
+```
+
+### **Copernicus Forecast LATAM**
+
+Endpoint de pronóstico climático para países de Latinoamérica basado en anomalías. Similar a `copernicus_forecast` pero adaptado a la estructura geográfica de LATAM. Incluye parámetros adicionales de `velocity` y `anomaly` para controlar el tipo de salida.
+
+Al igual que en el forecast de México, si se hace una consulta con `fh` mayor a 6, a partir del mes 7 regresará el promedio de las anomalías históricas agregado al promedio histórico.
+
+```python
+fc_df = cli.copernicus_forecast_latam(
+    nivel='departamento',  # nivel departamento o municipio
+    fecha_entrenamiento='2025-11-01',
+    variable=["maxtemp_c", "avgtemp_c"],
+    fh=24,
+    velocity=False,  # incluir velocidad de cambio
+    anomaly=True,    # incluir anomalías
+    pais='Colombia',
+    departamento='Antioquia',  # si se coloca None, la api devuelve todos
+    municipio=None,
+    as_frame=True
+)
+print(fc_df.head())
+```
+
+#### Consulta a nivel municipio
+
+```python
+fc_df = cli.copernicus_forecast_latam(
+    nivel='municipio',
+    fecha_entrenamiento='2025-11-01',
+    variable="avgtemp_c",
+    fh=12,
+    velocity=True,
+    anomaly=True,
+    pais='Chile',
+    departamento='Metropolitana',
+    municipio='Santiago',
+    as_frame=True
+)
+print(fc_df.head())
+```
+
+**Parámetros específicos LATAM:**
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `pais` | `str` | País de Latinoamérica (ej: 'Colombia', 'Perú', 'Chile') |
+| `departamento` | `str \| None` | División administrativa nivel 1 (opcional, None devuelve todos) |
+| `municipio` | `str \| None` | División administrativa nivel 2 (opcional) |
+| `velocity` | `bool` | Incluir velocidad de cambio en la respuesta |
+| `anomaly` | `bool` | Incluir anomalías en la respuesta |
 
 ## Manejo de errores
 
