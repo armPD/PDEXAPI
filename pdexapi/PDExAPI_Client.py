@@ -3,7 +3,7 @@
 # Purpose: funciones para conectarse e interactuar con la API de Polydata Exógenos
 #          (PDExAPI) de manera sencilla y eficiente.
 # Author:  Fernando Figueroa  |  Equipo Polydata
-# Created: 2025‑07‑06  |  Last Updated: 2025‑07‑10  |  Version: 1.1-debugging
+# Created: 2025‑07‑06  |  Last Updated: 2026‑02‑16  |  Version: 1.1-debugging
 # ======================================================================================
 """Resumen
 -----------
@@ -421,6 +421,40 @@ class PDEXClient:
 
         data = self._get("/copernicus_historical", params=params)
         return pd.DataFrame(data) if as_frame else data
+    
+    # ------------------------------------------------------------------ #
+
+    def copernicus_historical_latam(
+        self,
+        *,
+        nivel: str,
+        freq: str,
+        variable,
+        fecha_inicio: str,
+        fecha_fin: str,
+        pais: str,
+        departamento: str | None = None,
+        municipio: str | None = None,
+        as_frame: bool = False,
+    ):
+        """
+        Consulta Copernicus histórico nivel ciudad/estado en frecuencia D/M.
+        """
+
+        params: Dict[str, Any] = {
+            "nivel": nivel,
+            "freq": freq,
+            "variable": variable,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+        }
+        if departamento:
+            params["departamento"] = departamento
+        if municipio:
+            params["municipio"] = municipio
+
+        data = self._get("/copernicus_historical_latam", params=params)
+        return pd.DataFrame(data) if as_frame else data
 
 
     # ------------------------------------------------------------------ #
@@ -465,6 +499,50 @@ class PDEXClient:
             params["ciudad"] = ciudad
 
         data = self._get("/copernicus_forecast", params=params)
+        return pd.DataFrame(data) if as_frame else data
+    
+
+    def copernicus_forecast_latam(
+        self,
+        *,
+        nivel: str,
+        fecha_entrenamiento: str,
+        variable,
+        fh: int,
+        velocity: bool,
+        anomaly: bool,
+        pais: str,
+        departamento: str | None = None,
+        municipio: str | None = None,
+        as_frame: bool = False,
+    ):
+        """
+        Forecast climático Copernicus basado en anomalías mensuales.
+
+        Parámetros
+        ----------
+        nivel : str
+        fecha_entrenamiento : 'YYYY-MM-DD'
+        variable : str | list[str]
+        fh : int (1..N)
+        estado, ciudad : opcionales
+        """
+
+        params: Dict[str, Any] = {
+            "nivel": nivel,
+            "fecha_entrenamiento": fecha_entrenamiento,
+            "variable": variable,
+            "fh": fh,
+            "country": pais,
+            "velocity": velocity,
+            "anomaly": anomaly,
+        }
+        if departamento:
+            params["departamento"] = departamento
+        if municipio:
+            params["municipio"] = municipio
+
+        data = self._get("/copernicus_forecast_latam", params=params)
         return pd.DataFrame(data) if as_frame else data
     
 
