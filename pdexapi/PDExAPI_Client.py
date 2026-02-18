@@ -444,6 +444,7 @@ class PDEXClient:
         params: Dict[str, Any] = {
             "nivel": nivel,
             "freq": freq,
+            "country": pais,
             "variable": variable,
             "fecha_inicio": fecha_inicio,
             "fecha_fin": fecha_fin,
